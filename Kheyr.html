@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kheyr — خير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --black:#0d0c0a;
+    --cream:#f0ead8;
+    --orange:#C8441A;
+    --brown:#2d2219;
+    --grey:#7a7060;
+    --font-display:'Bebas Neue',sans-serif;
+    --font-body:'DM Sans',sans-serif;
+    --font-arabic:'Noto Naskh Arabic',serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--black);color:var(--cream);font-family:var(--font-body);font-size:15px;line-height:1.6;overflow-x:hidden}
+  ::selection{background:var(--orange);color:var(--cream)}
+  ::-webkit-scrollbar{width:3px}
+  ::-webkit-scrollbar-track{background:var(--black)}
+  ::-webkit-scrollbar-thumb{background:var(--orange)}
+  #root{min-height:100vh}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  {
+    id: 1,
+    slug: 'al-nour',
+    name: 'Al-Nour',
+    arabic: 'النور',
+    meaning: 'The Light',
+    hero: true,
+    price: 95,
+    tag: 'HERO DROP',
+    desc: 'Our signature piece. Cream performance fabric with deep brown V-neck stripe trim. Bold "خير" Thuluth calligraphy embroidered at centre chest. Subtle diagonal jacquard weave catches the light.',
+    details: ['Premium polyester-cotton blend', 'V-neck with triple stripe trim', 'Chest calligraphy embroidery', 'Woven badge — right chest', 'Relaxed athletic fit'],
+    colors: ['Cream', 'Midnight'],
+    sizes: ['XS','S','M','L','XL','XXL'],
+    colorPrimary: '#e8e0cc',
+    colorAccent: '#2d2219',
+    colorBadge: '#C8441A',
+    calligraphy: 'خير',
+    bg: '#1a1510',
+    cardBg: '#e8e0cc',
+    cardText: '#1a1510',
+  },
+  {
+    id: 2,
+    slug: 'al-fajr',
+    name: 'Al-Fajr',
+    arabic: 'الفجر',
+    meaning: 'The Dawn',
+    hero: false,
+    price: 85,
+    tag: 'NEW',
+    desc: 'Midnight black base with burnished orange chest calligraphy — "فجر" rendered in expressive Diwani script. Clean tonal panel seams reference classic football construction.',
+    details: ['Matte black performance fabric', 'Tonal panel seaming', 'Orange Diwani script embroidery', 'Ribbed crew collar', 'Oversized fit'],
+    colors: ['Black'],
+    sizes: ['XS','S','M','L','XL','XXL'],
+    colorPrimary: '#0d0c0a',
+    colorAccent: '#C8441A',
+    colorBadge: '#f0ead8',
+    calligraphy: 'فجر',
+    bg: '#0d0c0a',
+    cardBg: '#131210',
+    cardText: '#f0ead8',
+  },
+  {
+    id: 3,
+    slug: 'al-majd',
+    name: 'Al-Majd',
+    arabic: 'المجد',
+    meaning: 'The Glory',
+    hero: false,
+    price: 85,
+    tag: 'LIMITED',
+    desc: 'Deep navy with a sublimated geometric arabesque pattern woven into the fabric. Cream embroidered Kheyr crest on right chest. Collarbone Arabic script band — a nod to classic kit sponsorship strips.',
+    details: ['Deep navy sublimation-ready fabric', 'Arabesque pattern throughout', 'Cream crest embroidery', 'Collarbone script band', 'Standard athletic fit'],
+    colors: ['Navy'],
+    sizes: ['S','M','L','XL','XXL'],
+    colorPrimary: '#0f1a2e',
+    colorAccent: '#f0ead8',
+    colorBadge: '#C8441A',
+    calligraphy: 'مجد',
+    bg: '#0a1020',
+    cardBg: '#0f1a2e',
+    cardText: '#f0ead8',
+  },
+];
+
+const BUNDLE = { qty: 2, price: 155, saving: 15 };
+
+// ─── SHIRT SVG ILLUSTRATIONS ─────────────────────────────────────────────
+function ShirtSVG({ product, size = 300 }) {
+  const p = product;
+  return (
+    <svg viewBox="0 0 300 320" width={size} height={size * 1.067} fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Body */}
+      <path d="M60 80 L20 130 L55 145 L55 290 L245 290 L245 145 L280 130 L240 80 L210 60 Q175 40 150 45 Q125 40 90 60 Z"
+        fill={p.colorPrimary} stroke={p.colorAccent} strokeWidth="1.5"/>
+      {/* Collar */}
+      <path d="M110 58 Q150 80 190 58 Q175 45 150 44 Q125 45 110 58Z"
+        fill={p.colorAccent} opacity="0.9"/>
+      {/* Collar stripe 2 */}
+      <path d="M113 63 Q150 84 187 63" stroke={p.colorPrimary} strokeWidth="3" fill="none"/>
+      {/* Sleeve trim left */}
+      <path d="M20 130 L55 145" stroke={p.colorAccent} strokeWidth="4"/>
+      <path d="M22 138 L57 153" stroke={p.colorAccent} strokeWidth="2" opacity="0.5"/>
+      {/* Sleeve trim right */}
+      <path d="M280 130 L245 145" stroke={p.colorAccent} strokeWidth="4"/>
+      <path d="M278 138 L243 153" stroke={p.colorAccent} strokeWidth="2" opacity="0.5"/>
+      {/* Badge */}
+      <rect x="185" y="100" width="36" height="36" rx="4" fill={p.colorAccent} opacity="0.15" stroke={p.colorAccent} strokeWidth="1"/>
+      <text x="203" y="123" textAnchor="middle" fontFamily="Noto Naskh Arabic" fontSize="16" fill={p.colorAccent}>★</text>
+      {/* Main calligraphy */}
+      <text x="140" y="210"
+        textAnchor="middle"
+        fontFamily="Noto Naskh Arabic"
+        fontSize={p.id === 1 ? "90" : "72"}
+        fontWeight="700"
+        fill={p.colorAccent}
+        opacity="0.92"
+      >{p.calligraphy}</text>
+      {/* Small brand text */}
+      <text x="105" y="105" fontFamily="Bebas Neue" fontSize="7" fill={p.colorAccent} opacity="0.5" letterSpacing="1">KHEYR خير</text>
+    </svg>
+  );
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────
+function Nav({ page, setPage, cartCount, setCartOpen }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  const nav = (p) => { setPage(p); setMenuOpen(false); window.scrollTo(0,0); };
+
+  return (
+    <>
+    <nav style={{
+      position:'fixed', top:0, left:0, right:0, zIndex:100,
+      padding:'0 32px',
+      height:64,
+      display:'flex', alignItems:'center', justifyContent:'space-between',
+      background: scrolled ? 'rgba(13,12,10,0.96)' : 'transparent',
+      backdropFilter: scrolled ? 'blur(12px)' : 'none',
+      borderBottom: scrolled ? '1px solid rgba(240,234,216,0.06)' : 'none',
+      transition:'all 0.4s ease',
+    }}>
+      {/* Logo */}
+      <button onClick={() => nav('home')} style={{background:'none',border:'none',cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
+        <span style={{fontFamily:'Noto Naskh Arabic',fontSize:26,color:'var(--orange)',fontWeight:700,lineHeight:1}}>خير</span>
+        <span style={{fontFamily:'var(--font-display)',fontSize:22,color:'var(--cream)',letterSpacing:2}}>KHEYR</span>
+      </button>
+
+      {/* Desktop links */}
+      <div style={{display:'flex',gap:36,alignItems:'center'}}>
+        {['home','shop','about'].map(p => (
+          <button key={p} onClick={() => nav(p)} style={{
+            background:'none',border:'none',cursor:'pointer',
+            fontFamily:'var(--font-body)',fontSize:13,fontWeight:500,
+            color: page === p ? 'var(--cream)' : 'var(--grey)',
+            letterSpacing:'0.08em',textTransform:'uppercase',
+            transition:'color 0.2s',
+          }}>{p}</button>
+        ))}
+        <button onClick={() => setCartOpen(true)} style={{
+          background:'none',border:'1px solid rgba(240,234,216,0.2)',
+          borderRadius:2,cursor:'pointer',
+          padding:'8px 16px',display:'flex',alignItems:'center',gap:8,
+          color:'var(--cream)',fontFamily:'var(--font-body)',fontSize:13,
+          transition:'border-color 0.2s, background 0.2s',
+        }}
+        onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--orange)';e.currentTarget.style.background='rgba(200,68,26,0.08)'}}
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(240,234,216,0.2)';e.currentTarget.style.background='none'}}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+          {cartCount > 0 && <span style={{
+            background:'var(--orange)',color:'var(--cream)',
+            fontSize:11,fontWeight:700,borderRadius:99,
+            width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',
+          }}>{cartCount}</span>}
+        </button>
+      </div>
+    </nav>
+
+    {/* Announcement bar */}
+    <div style={{
+      position:'fixed',top:64,left:0,right:0,zIndex:99,
+      background:'var(--orange)',
+      padding:'6px 0',
+      display:'flex',alignItems:'center',justifyContent:'center',
+      gap:32,overflow:'hidden',
+    }}>
+      {['FREE UK SHIPPING ON ORDERS OVER £150','LIMITED FIRST DROP — ONLY 200 PIECES','خير — GOODNESS IN EVERY THREAD'].map((t,i) => (
+        <span key={i} style={{fontFamily:'var(--font-display)',fontSize:12,color:'var(--cream)',letterSpacing:'0.12em',whiteSpace:'nowrap'}}>{t}</span>
+      ))}
+    </div>
+    </>
+  );
+}
+
+// ─── TICKER ──────────────────────────────────────────────────────────────
+function Ticker() {
+  const items = ['خير','KHEYR','GOODNESS','النور','PREMIUM KIT','الفجر','ARABIC EMBROIDERY','المجد','MODEST LUXURY','خير'];
+  return (
+    <div style={{overflow:'hidden',borderTop:'1px solid rgba(240,234,216,0.08)',borderBottom:'1px solid rgba(240,234,216,0.08)',padding:'12px 0',background:'var(--black)'}}>
+      <style>{`@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+      <div style={{display:'flex',animation:'ticker 18s linear infinite',width:'max-content'}}>
+        {[...items,...items].map((t,i) => (
+          <span key={i} style={{
+            fontFamily: t.match(/[\u0600-\u06FF]/) ? 'var(--font-arabic)' : 'var(--font-display)',
+            fontSize:14,color:'var(--grey)',letterSpacing:'0.15em',
+            padding:'0 28px',whiteSpace:'nowrap',
+          }}>{t} <span style={{color:'var(--orange)',margin:'0 4px'}}>·</span></span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── HOME PAGE ───────────────────────────────────────────────────────────
+function HomePage({ setPage, setSelectedProduct, addToCart }) {
+  const hero = PRODUCTS[0];
+  const [hovered, setHovered] = useState(null);
+
+  return (
+    <div>
+      {/* HERO */}
+      <section style={{
+        minHeight:'100vh',
+        display:'grid', gridTemplateColumns:'1fr 1fr',
+        paddingTop:100,
+        position:'relative',
+        overflow:'hidden',
+      }}>
+        {/* Arabic watermark bg */}
+        <div style={{
+          position:'absolute',right:-60,top:'50%',transform:'translateY(-50%)',
+          fontFamily:'var(--font-arabic)',fontSize:500,
+          color:'rgba(200,68,26,0.04)',
+          lineHeight:1,userSelect:'none',pointerEvents:'none',
+          fontWeight:700,
+        }}>خير</div>
+
+        {/* Left — copy */}
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',padding:'80px 64px 80px 64px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:32}}>
+            <div style={{width:32,height:1,background:'var(--orange)'}}/>
+            <span style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase'}}>First Drop — 2025</span>
+          </div>
+          <h1 style={{fontFamily:'var(--font-display)',fontSize:'clamp(72px,8vw,120px)',lineHeight:0.92,color:'var(--cream)',letterSpacing:'-0.01em',marginBottom:16}}>
+            WEAR<br/>GOOD<br/>NESS
+          </h1>
+          <div style={{fontFamily:'var(--font-arabic)',fontSize:42,color:'var(--orange)',marginBottom:32,lineHeight:1.2}}>
+            البسوا الخير
+          </div>
+          <p style={{color:'var(--grey)',maxWidth:360,lineHeight:1.7,marginBottom:48,fontSize:15}}>
+            Premium football-style polos. Arabic calligraphy embroidery. Built for those who carry culture wherever they go.
+          </p>
+          <div style={{display:'flex',gap:16}}>
+            <button onClick={() => { setPage('shop'); window.scrollTo(0,0); }} style={{
+              background:'var(--orange)',border:'none',color:'var(--cream)',
+              fontFamily:'var(--font-display)',fontSize:16,letterSpacing:'0.12em',
+              padding:'16px 40px',cursor:'pointer',
+              transition:'opacity 0.2s',
+            }}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+            >SHOP THE DROP</button>
+            <button onClick={() => { setSelectedProduct(hero); setPage('product'); window.scrollTo(0,0); }} style={{
+              background:'none',border:'1px solid rgba(240,234,216,0.2)',color:'var(--cream)',
+              fontFamily:'var(--font-display)',fontSize:16,letterSpacing:'0.12em',
+              padding:'16px 32px',cursor:'pointer',
+              transition:'border-color 0.2s',
+            }}
+            onMouseEnter={e=>e.currentTarget.style.borderColor='var(--cream)'}
+            onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(240,234,216,0.2)'}
+            >HERO PIECE</button>
+          </div>
+        </div>
+
+        {/* Right — hero shirt */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'80px 64px',position:'relative'}}>
+          <div style={{
+            position:'absolute',inset:0,
+            background:'radial-gradient(ellipse at center, rgba(200,68,26,0.08) 0%, transparent 70%)',
+          }}/>
+          <div style={{position:'relative',animation:'float 6s ease-in-out infinite'}}>
+            <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}`}</style>
+            <ShirtSVG product={hero} size={420}/>
+          </div>
+          {/* Price tag */}
+          <div style={{
+            position:'absolute',bottom:100,right:64,
+            background:'var(--orange)',padding:'12px 24px',
+          }}>
+            <div style={{fontFamily:'var(--font-display)',fontSize:28,color:'var(--cream)',letterSpacing:1}}>£95</div>
+            <div style={{fontFamily:'var(--font-body)',fontSize:11,color:'rgba(240,234,216,0.7)',letterSpacing:'0.1em'}}>AL-NOUR — النور</div>
+          </div>
+        </div>
+      </section>
+
+      <Ticker/>
+
+      {/* FEATURED PRODUCT */}
+      <section style={{padding:'120px 64px',background:'var(--cream)'}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:64}}>
+            <div>
+              <p style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase',marginBottom:12}}>Hero Piece</p>
+              <h2 style={{fontFamily:'var(--font-display)',fontSize:72,color:'var(--black)',lineHeight:0.9,letterSpacing:'-0.01em'}}>AL-NOUR<br/><span style={{fontFamily:'var(--font-arabic)',fontSize:56}}>النور</span></h2>
+            </div>
+            <button onClick={() => { setSelectedProduct(hero); setPage('product'); window.scrollTo(0,0); }} style={{
+              background:'var(--black)',border:'none',color:'var(--cream)',
+              fontFamily:'var(--font-display)',fontSize:14,letterSpacing:'0.12em',
+              padding:'14px 32px',cursor:'pointer',marginBottom:8,
+              transition:'background 0.2s',
+            }}
+            onMouseEnter={e=>e.currentTarget.style.background='#2d2219'}
+            onMouseLeave={e=>e.currentTarget.style.background='var(--black)'}
+            >VIEW PIECE →</button>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:0,border:'1px solid rgba(13,12,10,0.08)'}}>
+            <div style={{
+              background:'#e8e0cc',
+              display:'flex',alignItems:'center',justifyContent:'center',
+              padding:'80px',minHeight:500,
+              position:'relative',overflow:'hidden',
+            }}>
+              <div style={{
+                position:'absolute',fontFamily:'var(--font-arabic)',fontSize:280,
+                color:'rgba(45,34,25,0.05)',fontWeight:700,userSelect:'none',
+              }}>خ</div>
+              <ShirtSVG product={hero} size={320}/>
+            </div>
+            <div style={{
+              background:'var(--black)',padding:'64px',
+              display:'flex',flexDirection:'column',justifyContent:'space-between',
+            }}>
+              <div>
+                <div style={{display:'flex',gap:8,marginBottom:32}}>
+                  <span style={{background:'var(--orange)',color:'var(--cream)',fontFamily:'var(--font-display)',fontSize:11,letterSpacing:'0.1em',padding:'4px 12px'}}>HERO DROP</span>
+                  <span style={{border:'1px solid rgba(240,234,216,0.15)',color:'var(--grey)',fontFamily:'var(--font-display)',fontSize:11,letterSpacing:'0.1em',padding:'4px 12px'}}>LIMITED 200</span>
+                </div>
+                <h3 style={{fontFamily:'var(--font-display)',fontSize:48,color:'var(--cream)',marginBottom:8,letterSpacing:'-0.01em'}}>THE LIGHT</h3>
+                <p style={{color:'var(--grey)',fontSize:14,lineHeight:1.8,marginBottom:40,maxWidth:340}}>
+                  Our signature piece. Cream performance fabric with deep brown V-neck stripe trim. Bold "خير" Thuluth calligraphy embroidered at centre chest.
+                </p>
+                <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:40}}>
+                  {hero.details.map((d,i) => (
+                    <div key={i} style={{display:'flex',gap:12,alignItems:'center'}}>
+                      <div style={{width:4,height:4,borderRadius:'50%',background:'var(--orange)',flexShrink:0}}/>
+                      <span style={{color:'rgba(240,234,216,0.6)',fontSize:13}}>{d}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{fontFamily:'var(--font-display)',fontSize:48,color:'var(--cream)',marginBottom:24}}>£95</div>
+                <button onClick={() => addToCart(hero)} style={{
+                  width:'100%',background:'var(--orange)',border:'none',
+                  color:'var(--cream)',fontFamily:'var(--font-display)',
+                  fontSize:16,letterSpacing:'0.12em',padding:'18px',
+                  cursor:'pointer',transition:'opacity 0.2s',
+                }}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+                >ADD TO CART — AL-NOUR</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BRAND STRIP */}
+      <section style={{
+        padding:'100px 64px',
+        background:'var(--brown)',
+        display:'grid',gridTemplateColumns:'1fr 1fr',gap:64,alignItems:'center',
+      }}>
+        <div>
+          <p style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase',marginBottom:20}}>Our Story</p>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:60,color:'var(--cream)',lineHeight:0.92,marginBottom:32}}>ROOTED IN<br/>CULTURE.<br/>BUILT FOR<br/>THE PITCH.</h2>
+          <p style={{color:'rgba(240,234,216,0.55)',lineHeight:1.8,maxWidth:400,marginBottom:32}}>
+            Kheyr — Arabic for goodness — was born at the intersection of Islamic art and football culture. Every stitch is intentional. Every design carries meaning.
+          </p>
+          <p style={{color:'rgba(240,234,216,0.55)',lineHeight:1.8,maxWidth:400}}>
+            We don't compromise on quality or identity. Premium fabrics, hand-embroidered Arabic calligraphy, and silhouettes inspired by the greatest kits ever made.
+          </p>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:1,background:'rgba(240,234,216,0.06)'}}>
+          {[
+            { num: '200', label: 'Pieces — First Drop', ar: 'قطعة' },
+            { num: '3', label: 'Signature Designs', ar: 'تصميم' },
+            { num: '100%', label: 'Arabic Embroidery', ar: 'تطريز' },
+            { num: 'UK', label: 'Made to Order', ar: 'مصنوع' },
+          ].map((s,i) => (
+            <div key={i} style={{
+              background:'rgba(13,12,10,0.6)',padding:'40px 32px',
+              borderBottom: i < 2 ? '1px solid rgba(240,234,216,0.06)' : 'none',
+            }}>
+              <div style={{fontFamily:'var(--font-display)',fontSize:48,color:'var(--orange)',lineHeight:1}}>{s.num}</div>
+              <div style={{color:'rgba(240,234,216,0.5)',fontSize:12,marginTop:8,letterSpacing:'0.05em'}}>{s.label}</div>
+              <div style={{fontFamily:'var(--font-arabic)',fontSize:16,color:'rgba(240,234,216,0.2)',marginTop:4}}>{s.ar}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRODUCT GRID */}
+      <section style={{padding:'120px 64px',background:'var(--black)'}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:64}}>
+            <div>
+              <p style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase',marginBottom:12}}>The Collection</p>
+              <h2 style={{fontFamily:'var(--font-display)',fontSize:56,color:'var(--cream)',lineHeight:0.9}}>ALL PIECES</h2>
+            </div>
+            <button onClick={() => { setPage('shop'); window.scrollTo(0,0); }} style={{
+              background:'none',border:'1px solid rgba(240,234,216,0.15)',color:'var(--grey)',
+              fontFamily:'var(--font-display)',fontSize:13,letterSpacing:'0.1em',
+              padding:'12px 28px',cursor:'pointer',
+              transition:'all 0.2s',
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--cream)';e.currentTarget.style.color='var(--cream)'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(240,234,216,0.15)';e.currentTarget.style.color='var(--grey)'}}
+            >VIEW ALL →</button>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:2}}>
+            {PRODUCTS.map(p => (
+              <ProductCard key={p.id} product={p}
+                onView={() => { setSelectedProduct(p); setPage('product'); window.scrollTo(0,0); }}
+                onCart={() => addToCart(p)}
+              />
+            ))}
+          </div>
+
+          {/* Bundle */}
+          <div style={{
+            marginTop:2,
+            background:'var(--orange)',
+            padding:'48px 64px',
+            display:'flex',justifyContent:'space-between',alignItems:'center',
+          }}>
+            <div>
+              <p style={{fontFamily:'var(--font-display)',fontSize:12,letterSpacing:'0.2em',color:'rgba(240,234,216,0.7)',marginBottom:8}}>BUNDLE & SAVE</p>
+              <h3 style={{fontFamily:'var(--font-display)',fontSize:48,color:'var(--cream)',lineHeight:0.9}}>ANY 2 PIECES<br/>£155</h3>
+              <p style={{color:'rgba(240,234,216,0.7)',fontSize:13,marginTop:8}}>Save £15 — mix any designs or sizes</p>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontFamily:'var(--font-arabic)',fontSize:64,color:'rgba(240,234,216,0.15)',lineHeight:1}}>خير</div>
+              <button onClick={() => { setPage('shop'); window.scrollTo(0,0); }} style={{
+                background:'var(--cream)',border:'none',color:'var(--orange)',
+                fontFamily:'var(--font-display)',fontSize:15,letterSpacing:'0.1em',
+                padding:'14px 36px',cursor:'pointer',marginTop:16,
+                transition:'opacity 0.2s',
+              }}
+              onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+              onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+              >SHOP BUNDLE →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer setPage={setPage}/>
+    </div>
+  );
+}
+
+// ─── PRODUCT CARD ─────────────────────────────────────────────────────────
+function ProductCard({ product: p, onView, onCart }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      style={{
+        background: p.cardBg,
+        cursor:'pointer',
+        position:'relative',
+        overflow:'hidden',
+        transition:'transform 0.3s',
+        transform: hovered ? 'scale(1.01)' : 'scale(1)',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onView}
+    >
+      {/* Tag */}
+      <div style={{position:'absolute',top:16,left:16,zIndex:2}}>
+        <span style={{
+          background:'var(--orange)',color:'var(--cream)',
+          fontFamily:'var(--font-display)',fontSize:10,letterSpacing:'0.12em',
+          padding:'3px 10px',
+        }}>{p.tag}</span>
+      </div>
+      {/* Image area */}
+      <div style={{
+        height:340,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        position:'relative',
+        background: p.bg,
+        padding:40,
+      }}>
+        <div style={{
+          position:'absolute',
+          fontFamily:'var(--font-arabic)',fontSize:200,
+          color: p.id === 1 ? 'rgba(45,34,25,0.05)' : 'rgba(240,234,216,0.04)',
+          fontWeight:700,userSelect:'none',lineHeight:1,
+        }}>{p.calligraphy[0]}</div>
+        <ShirtSVG product={p} size={220}/>
+
+        {/* Hover overlay */}
+        <div style={{
+          position:'absolute',inset:0,
+          background:'rgba(0,0,0,0.5)',
+          display:'flex',alignItems:'center',justifyContent:'center',
+          opacity: hovered ? 1 : 0,
+          transition:'opacity 0.3s',
+        }}>
+          <button onClick={e => { e.stopPropagation(); onCart(); }} style={{
+            background:'var(--orange)',border:'none',color:'var(--cream)',
+            fontFamily:'var(--font-display)',fontSize:13,letterSpacing:'0.1em',
+            padding:'12px 28px',cursor:'pointer',
+          }}>QUICK ADD</button>
+        </div>
+      </div>
+      {/* Info */}
+      <div style={{padding:'20px 24px',background:p.id===1?'#e8e0cc':'rgba(13,12,10,0.95)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:22,color:p.cardText,letterSpacing:0}}>{p.name}</div>
+            <div style={{fontFamily:'var(--font-arabic)',fontSize:14,color:p.id===1?'rgba(13,12,10,0.4)':'rgba(240,234,216,0.3)',marginTop:2}}>{p.arabic} — {p.meaning}</div>
+          </div>
+          <div style={{fontFamily:'var(--font-display)',fontSize:24,color:p.id===1?'var(--black)':'var(--cream)'}}>£{p.price}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SHOP PAGE ────────────────────────────────────────────────────────────
+function ShopPage({ setPage, setSelectedProduct, addToCart }) {
+  const [filter, setFilter] = useState('ALL');
+  const filters = ['ALL','CREAM','BLACK','NAVY'];
+  const filtered = PRODUCTS.filter(p => {
+    if (filter === 'ALL') return true;
+    if (filter === 'CREAM') return p.id === 1;
+    if (filter === 'BLACK') return p.id === 2;
+    if (filter === 'NAVY') return p.id === 3;
+    return true;
+  });
+
+  return (
+    <div style={{paddingTop:100}}>
+      {/* Header */}
+      <div style={{padding:'80px 64px 48px',borderBottom:'1px solid rgba(240,234,216,0.06)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',maxWidth:1200,margin:'0 auto'}}>
+          <div>
+            <p style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase',marginBottom:12}}>Collection — SS25</p>
+            <h1 style={{fontFamily:'var(--font-display)',fontSize:80,color:'var(--cream)',lineHeight:0.9,letterSpacing:'-0.01em'}}>
+              THE<br/>SHOP
+            </h1>
+          </div>
+          <div style={{fontFamily:'var(--font-arabic)',fontSize:80,color:'rgba(200,68,26,0.15)',lineHeight:1}}>المتجر</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{padding:'24px 64px',borderBottom:'1px solid rgba(240,234,216,0.06)',display:'flex',gap:8,maxWidth:1200,margin:'0 auto'}}>
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            background: filter === f ? 'var(--orange)' : 'none',
+            border:'1px solid',
+            borderColor: filter === f ? 'var(--orange)' : 'rgba(240,234,216,0.15)',
+            color: filter === f ? 'var(--cream)' : 'var(--grey)',
+            fontFamily:'var(--font-display)',fontSize:12,letterSpacing:'0.1em',
+            padding:'8px 20px',cursor:'pointer',transition:'all 0.2s',
+          }}>{f}</button>
+        ))}
+        <span style={{marginLeft:'auto',color:'var(--grey)',fontSize:12,alignSelf:'center',fontFamily:'var(--font-body)'}}>{filtered.length} pieces</span>
+      </div>
+
+      {/* Grid */}
+      <div style={{padding:'48px 64px',maxWidth:1200,margin:'0 auto'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:2}}>
+          {filtered.map(p => (
+            <ProductCard key={p.id} product={p}
+              onView={() => { setSelectedProduct(p); setPage('product'); window.scrollTo(0,0); }}
+              onCart={() => addToCart(p)}
+            />
+          ))}
+        </div>
+
+        {/* Bundle banner */}
+        <div style={{marginTop:48,border:'1px solid var(--orange)',padding:'40px 48px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:11,letterSpacing:'0.15em',color:'var(--orange)',marginBottom:8}}>BUNDLE DEAL</div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:36,color:'var(--cream)'}}>ANY 2 FOR £155 — SAVE £15</div>
+          </div>
+          <div style={{fontFamily:'var(--font-arabic)',fontSize:32,color:'var(--orange)',opacity:0.6}}>خير</div>
+        </div>
+      </div>
+
+      <Footer setPage={setPage}/>
+    </div>
+  );
+}
+
+// ─── PRODUCT PAGE ─────────────────────────────────────────────────────────
+function ProductPage({ product: p, setPage, addToCart }) {
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
+  const [tab, setTab] = useState('desc');
+
+  if (!p) return null;
+
+  const handleAdd = () => {
+    if (!selectedSize) return;
+    addToCart(p, qty);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  const views = ['front','angle','detail'];
+
+  return (
+    <div style={{paddingTop:100}}>
+      {/* Breadcrumb */}
+      <div style={{padding:'24px 64px',borderBottom:'1px solid rgba(240,234,216,0.06)',display:'flex',gap:12,alignItems:'center'}}>
+        <button onClick={() => setPage('shop')} style={{background:'none',border:'none',color:'var(--grey)',cursor:'pointer',fontFamily:'var(--font-body)',fontSize:12,letterSpacing:'0.05em'}}>Shop</button>
+        <span style={{color:'rgba(240,234,216,0.2)'}}>—</span>
+        <span style={{color:'var(--cream)',fontFamily:'var(--font-body)',fontSize:12}}>{p.name}</span>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',maxWidth:1400,margin:'0 auto',minHeight:'calc(100vh - 164px)'}}>
+        {/* Left — Gallery */}
+        <div style={{position:'sticky',top:100,height:'calc(100vh - 100px)',display:'flex',gap:16,padding:'48px 48px 48px 64px'}}>
+          {/* Thumbnails */}
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {views.map((v,i) => (
+              <div key={i} onClick={() => setActiveImg(i)} style={{
+                width:64,height:64,
+                background: activeImg === i ? p.bg : 'rgba(240,234,216,0.04)',
+                border: `1px solid ${activeImg === i ? 'var(--orange)' : 'rgba(240,234,216,0.1)'}`,
+                cursor:'pointer',
+                display:'flex',alignItems:'center',justifyContent:'center',
+                transition:'border-color 0.2s',
+                overflow:'hidden',
+              }}>
+                <div style={{transform:'scale(0.4)',transformOrigin:'center'}}>
+                  <ShirtSVG product={p} size={160}/>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Main */}
+          <div style={{
+            flex:1,
+            background: p.bg,
+            display:'flex',alignItems:'center',justifyContent:'center',
+            position:'relative',overflow:'hidden',
+            border:'1px solid rgba(240,234,216,0.06)',
+          }}>
+            <div style={{
+              position:'absolute',
+              fontFamily:'var(--font-arabic)',fontSize:300,
+              color: p.id === 1 ? 'rgba(45,34,25,0.06)' : 'rgba(240,234,216,0.03)',
+              fontWeight:700,lineHeight:1,userSelect:'none',
+            }}>{p.calligraphy[0]}</div>
+            <div style={{
+              transform: activeImg === 1 ? 'rotate(-8deg) scale(0.92)' : activeImg === 2 ? 'scale(1.15) translateY(30px)' : 'none',
+              transition:'transform 0.4s ease',
+            }}>
+              <ShirtSVG product={p} size={360}/>
+            </div>
+            {/* Tag */}
+            <div style={{position:'absolute',top:20,right:20,background:'var(--orange)',padding:'4px 12px'}}>
+              <span style={{fontFamily:'var(--font-display)',fontSize:10,color:'var(--cream)',letterSpacing:'0.1em'}}>{p.tag}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — Details */}
+        <div style={{padding:'48px 64px 80px 48px',borderLeft:'1px solid rgba(240,234,216,0.06)'}}>
+          <div style={{marginBottom:8,fontFamily:'var(--font-body)',fontSize:11,color:'var(--orange)',letterSpacing:'0.15em',textTransform:'uppercase'}}>{p.meaning} — {p.arabic}</div>
+          <h1 style={{fontFamily:'var(--font-display)',fontSize:72,color:'var(--cream)',lineHeight:0.9,marginBottom:8,letterSpacing:'-0.01em'}}>{p.name}</h1>
+          <div style={{fontFamily:'var(--font-arabic)',fontSize:36,color:'rgba(200,68,26,0.6)',marginBottom:32}}>{p.arabic}</div>
+
+          <div style={{fontFamily:'var(--font-display)',fontSize:48,color:'var(--cream)',marginBottom:40}}>£{p.price}</div>
+
+          {/* Color */}
+          <div style={{marginBottom:32}}>
+            <div style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.12em',color:'var(--grey)',textTransform:'uppercase',marginBottom:12}}>Colourway — <span style={{color:'var(--cream)'}}>{p.colors[selectedColor]}</span></div>
+            <div style={{display:'flex',gap:8}}>
+              {p.colors.map((c,i) => (
+                <button key={i} onClick={() => setSelectedColor(i)} style={{
+                  width:40,height:40,
+                  background: c === 'Cream' ? '#e8e0cc' : c === 'Midnight' ? '#0d0c0a' : c === 'Black' ? '#111' : '#0f1a2e',
+                  border: `2px solid ${selectedColor === i ? 'var(--orange)' : 'rgba(240,234,216,0.15)'}`,
+                  cursor:'pointer',transition:'border-color 0.2s',
+                }}/>
+              ))}
+            </div>
+          </div>
+
+          {/* Size */}
+          <div style={{marginBottom:40}}>
+            <div style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.12em',color:'var(--grey)',textTransform:'uppercase',marginBottom:12,display:'flex',justifyContent:'space-between'}}>
+              <span>Size — <span style={{color:'var(--cream)'}}>{selectedSize || 'Select'}</span></span>
+              <span style={{cursor:'pointer',color:'var(--orange)',textDecoration:'underline'}}>Size Guide</span>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+              {p.sizes.map(s => (
+                <button key={s} onClick={() => setSelectedSize(s)} style={{
+                  width:56,height:56,
+                  background: selectedSize === s ? 'var(--orange)' : 'none',
+                  border:'1px solid',
+                  borderColor: selectedSize === s ? 'var(--orange)' : 'rgba(240,234,216,0.15)',
+                  color: selectedSize === s ? 'var(--cream)' : 'var(--grey)',
+                  fontFamily:'var(--font-body)',fontSize:13,fontWeight:500,
+                  cursor:'pointer',transition:'all 0.2s',
+                }}
+                onMouseEnter={e=>{ if(selectedSize!==s){ e.currentTarget.style.borderColor='var(--cream)'; e.currentTarget.style.color='var(--cream)'; }}}
+                onMouseLeave={e=>{ if(selectedSize!==s){ e.currentTarget.style.borderColor='rgba(240,234,216,0.15)'; e.currentTarget.style.color='var(--grey)'; }}}
+                >{s}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Qty + Add */}
+          <div style={{display:'grid',gridTemplateColumns:'100px 1fr',gap:8,marginBottom:16}}>
+            <div style={{display:'flex',border:'1px solid rgba(240,234,216,0.15)'}}>
+              <button onClick={() => setQty(Math.max(1,qty-1))} style={{flex:1,background:'none',border:'none',color:'var(--cream)',cursor:'pointer',fontSize:18}}>−</button>
+              <span style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--cream)',fontFamily:'var(--font-display)',fontSize:18}}>{qty}</span>
+              <button onClick={() => setQty(Math.min(10,qty+1))} style={{flex:1,background:'none',border:'none',color:'var(--cream)',cursor:'pointer',fontSize:18}}>+</button>
+            </div>
+            <button onClick={handleAdd} style={{
+              background: added ? '#2d7a4f' : selectedSize ? 'var(--orange)' : 'rgba(240,234,216,0.08)',
+              border:'none',color:'var(--cream)',
+              fontFamily:'var(--font-display)',fontSize:16,letterSpacing:'0.1em',
+              padding:'18px',cursor: selectedSize ? 'pointer' : 'not-allowed',
+              transition:'all 0.3s',
+            }}>
+              {added ? '✓ ADDED TO CART' : !selectedSize ? 'SELECT A SIZE' : 'ADD TO CART'}
+            </button>
+          </div>
+          {!selectedSize && <p style={{color:'var(--grey)',fontSize:12,marginBottom:24}}>Please select a size to continue</p>}
+
+          {/* Trust */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:1,marginBottom:40}}>
+            {[
+              { icon:'🚚', title:'Free UK Shipping', sub:'On orders over £150' },
+              { icon:'↩', title:'30-Day Returns', sub:'Unworn, tags attached' },
+              { icon:'✦', title:'Embroidery Quality', sub:'Artisan hand-finished' },
+              { icon:'🔒', title:'Secure Checkout', sub:'SSL encrypted' },
+            ].map((t,i) => (
+              <div key={i} style={{
+                padding:'16px',
+                background:'rgba(240,234,216,0.03)',
+                border:'1px solid rgba(240,234,216,0.06)',
+                display:'flex',gap:12,alignItems:'flex-start',
+              }}>
+                <span style={{fontSize:16}}>{t.icon}</span>
+                <div>
+                  <div style={{color:'var(--cream)',fontSize:12,fontWeight:500}}>{t.title}</div>
+                  <div style={{color:'var(--grey)',fontSize:11,marginTop:2}}>{t.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tabs */}
+          <div style={{borderTop:'1px solid rgba(240,234,216,0.08)'}}>
+            <div style={{display:'flex',gap:0,marginBottom:0}}>
+              {[['desc','Description'],['details','Details'],['care','Care']].map(([k,l]) => (
+                <button key={k} onClick={() => setTab(k)} style={{
+                  background:'none',border:'none',borderBottom:`2px solid ${tab===k?'var(--orange)':'transparent'}`,
+                  color: tab===k ? 'var(--cream)' : 'var(--grey)',
+                  fontFamily:'var(--font-body)',fontSize:12,letterSpacing:'0.08em',textTransform:'uppercase',
+                  padding:'16px 24px 14px',cursor:'pointer',transition:'all 0.2s',
+                }}>{l}</button>
+              ))}
+            </div>
+            <div style={{padding:'24px 0'}}>
+              {tab === 'desc' && <p style={{color:'rgba(240,234,216,0.6)',fontSize:14,lineHeight:1.8}}>{p.desc}</p>}
+              {tab === 'details' && (
+                <ul style={{listStyle:'none',display:'flex',flexDirection:'column',gap:10}}>
+                  {p.details.map((d,i) => (
+                    <li key={i} style={{display:'flex',gap:12,alignItems:'center',color:'rgba(240,234,216,0.6)',fontSize:13}}>
+                      <div style={{width:3,height:3,background:'var(--orange)',borderRadius:'50%',flexShrink:0}}/>
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {tab === 'care' && (
+                <div style={{color:'rgba(240,234,216,0.6)',fontSize:13,lineHeight:1.8}}>
+                  <p>Machine wash cold (30°C) — gentle cycle. Do not tumble dry. Iron on reverse — avoid calligraphy embroidery. Do not bleach. Store flat or folded.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Related */}
+      <div style={{padding:'80px 64px',borderTop:'1px solid rgba(240,234,216,0.06)'}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <h3 style={{fontFamily:'var(--font-display)',fontSize:40,color:'var(--cream)',marginBottom:40}}>YOU MAY ALSO LIKE</h3>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:2}}>
+            {PRODUCTS.filter(x => x.id !== p.id).map(prod => (
+              <ProductCard key={prod.id} product={prod}
+                onView={() => { window.scrollTo(0,0); }}
+                onCart={() => addToCart(prod)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ABOUT PAGE ──────────────────────────────────────────────────────────
+function AboutPage({ setPage }) {
+  return (
+    <div style={{paddingTop:100}}>
+      {/* Hero */}
+      <div style={{
+        minHeight:'60vh',
+        display:'flex',flexDirection:'column',justifyContent:'flex-end',
+        padding:'80px 64px',
+        borderBottom:'1px solid rgba(240,234,216,0.06)',
+        position:'relative',overflow:'hidden',
+      }}>
+        <div style={{
+          position:'absolute',right:64,top:'50%',transform:'translateY(-60%)',
+          fontFamily:'var(--font-arabic)',fontSize:400,
+          color:'rgba(200,68,26,0.05)',fontWeight:700,lineHeight:1,
+          userSelect:'none',
+        }}>خير</div>
+        <p style={{fontFamily:'var(--font-body)',fontSize:11,letterSpacing:'0.2em',color:'var(--orange)',textTransform:'uppercase',marginBottom:24}}>About Kheyr</p>
+        <h1 style={{fontFamily:'var(--font-display)',fontSize:'clamp(56px,7vw,100px)',color:'var(--cream)',lineHeight:0.9,maxWidth:800}}>
+          GOODNESS<br/>IN EVERY<br/>THREAD
+        </h1>
+      </div>
+
+      {/* Story */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:0,padding:'0'}}>
+        <div style={{padding:'80px 64px',borderRight:'1px solid rgba(240,234,216,0.06)'}}>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:40,color:'var(--cream)',marginBottom:32}}>THE BRAND</h2>
+          <div style={{display:'flex',flexDirection:'column',gap:20,color:'rgba(240,234,216,0.6)',fontSize:15,lineHeight:1.8}}>
+            <p>Kheyr (خير) is Arabic for goodness — a word that carries the weight of an entire worldview. We built a brand around it.</p>
+            <p>Football kits are the most worn cultural garments in the world. We asked: what if they carried our culture? What if the calligraphy of our ancestors sat where a sponsor logo normally goes?</p>
+            <p>The result is Kheyr. Premium polo shirts that honour both the pitch and the masjid. Designed for those who don't separate their identity.</p>
+          </div>
+        </div>
+        <div style={{padding:'80px 64px',background:'var(--brown)'}}>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:40,color:'var(--cream)',marginBottom:32}}>THE CRAFT</h2>
+          <div style={{display:'flex',flexDirection:'column',gap:20,color:'rgba(240,234,216,0.55)',fontSize:15,lineHeight:1.8}}>
+            <p>Every piece is produced in limited quantities. The calligraphy is machine-embroidered to an exacting standard — each letter must be legible, each stroke intentional.</p>
+            <p>Fabrics are selected for performance and drape. The silhouette references classic football kit construction — V-neck collar, panel seaming, structured hem — but relaxed for streetwear.</p>
+            <p>We don't rush. Each drop is finite. When it's gone, it's gone.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Values */}
+      <div style={{padding:'100px 64px',background:'var(--cream)'}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:56,color:'var(--black)',marginBottom:64,lineHeight:0.9}}>WHAT WE<br/>STAND FOR</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:48}}>
+            {[
+              { ar:'خير', en:'Goodness', desc:'Everything we make carries intention. Materials, design, message — all chosen with care.' },
+              { ar:'أصالة', en:'Authenticity', desc:'No trend-chasing. Arabic calligraphy is not an aesthetic — it is a living art form we respect.' },
+              { ar:'جودة', en:'Quality', desc:'Limited runs, no corners cut. We would rather make 200 pieces right than 2000 pieces wrong.' },
+            ].map((v,i) => (
+              <div key={i}>
+                <div style={{fontFamily:'var(--font-arabic)',fontSize:72,color:'var(--orange)',lineHeight:1,marginBottom:16}}>{v.ar}</div>
+                <h3 style={{fontFamily:'var(--font-display)',fontSize:28,color:'var(--black)',marginBottom:16}}>{v.en}</h3>
+                <p style={{color:'var(--brown)',fontSize:14,lineHeight:1.7,opacity:0.7}}>{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{padding:'100px 64px',textAlign:'center',position:'relative',overflow:'hidden'}}>
+        <div style={{
+          position:'absolute',inset:0,
+          background:'radial-gradient(ellipse at center, rgba(200,68,26,0.06) 0%, transparent 70%)',
+        }}/>
+        <div style={{fontFamily:'var(--font-arabic)',fontSize:100,color:'rgba(200,68,26,0.12)',marginBottom:32}}>خير</div>
+        <h2 style={{fontFamily:'var(--font-display)',fontSize:64,color:'var(--cream)',marginBottom:24}}>READY TO WEAR GOODNESS?</h2>
+        <button onClick={() => { setPage('shop'); window.scrollTo(0,0); }} style={{
+          background:'var(--orange)',border:'none',color:'var(--cream)',
+          fontFamily:'var(--font-display)',fontSize:18,letterSpacing:'0.12em',
+          padding:'20px 56px',cursor:'pointer',
+          transition:'opacity 0.2s',
+        }}
+        onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+        onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+        >SHOP THE COLLECTION</button>
+      </div>
+
+      <Footer setPage={setPage}/>
+    </div>
+  );
+}
+
+// ─── FOOTER ──────────────────────────────────────────────────────────────
+function Footer({ setPage }) {
+  return (
+    <footer style={{
+      borderTop:'1px solid rgba(240,234,216,0.06)',
+      padding:'64px 64px 40px',
+      background:'var(--black)',
+    }}>
+      <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:48,maxWidth:1200,margin:'0 auto 64px'}}>
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20}}>
+            <span style={{fontFamily:'var(--font-arabic)',fontSize:28,color:'var(--orange)',fontWeight:700}}>خير</span>
+            <span style={{fontFamily:'var(--font-display)',fontSize:20,color:'var(--cream)',letterSpacing:2}}>KHEYR</span>
+          </div>
+          <p style={{color:'var(--grey)',fontSize:13,lineHeight:1.7,maxWidth:280,marginBottom:24}}>Premium football-style polos with Arabic calligraphy embroidery. Modest luxury for those who wear their culture.</p>
+          <p style={{color:'rgba(240,234,216,0.2)',fontSize:11,letterSpacing:'0.15em'}}>البسوا الخير</p>
+        </div>
+        {[
+          { title:'Navigate', links:['Home','Shop','About','Stockists'] },
+          { title:'Help', links:['Size Guide','Shipping','Returns','FAQ'] },
+          { title:'Follow', links:['Instagram','TikTok','Twitter','Newsletter'] },
+        ].map((col,i) => (
+          <div key={i}>
+            <div style={{fontFamily:'var(--font-display)',fontSize:13,letterSpacing:'0.1em',color:'var(--grey)',marginBottom:20}}>{col.title}</div>
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              {col.links.map((l,j) => (
+                <span key={j} onClick={() => {
+                  if(l==='Home') { setPage('home'); window.scrollTo(0,0); }
+                  if(l==='Shop') { setPage('shop'); window.scrollTo(0,0); }
+                  if(l==='About') { setPage('about'); window.scrollTo(0,0); }
+                }} style={{color:'rgba(240,234,216,0.45)',fontSize:13,cursor:'pointer',transition:'color 0.2s'}}
+                onMouseEnter={e=>e.currentTarget.style.color='var(--cream)'}
+                onMouseLeave={e=>e.currentTarget.style.color='rgba(240,234,216,0.45)'}
+                >{l}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{borderTop:'1px solid rgba(240,234,216,0.06)',paddingTop:24,display:'flex',justifyContent:'space-between',alignItems:'center',maxWidth:1200,margin:'0 auto'}}>
+        <span style={{color:'rgba(240,234,216,0.2)',fontSize:11,letterSpacing:'0.08em'}}>© 2025 KHEYR. ALL RIGHTS RESERVED.</span>
+        <span style={{color:'rgba(240,234,216,0.2)',fontSize:11,letterSpacing:'0.08em'}}>MADE WITH INTENTION — خير</span>
+      </div>
+    </footer>
+  );
+}
+
+// ─── CART DRAWER ──────────────────────────────────────────────────────────
+function CartDrawer({ open, onClose, cart, removeFromCart, updateQty }) {
+  const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
+
+  return (
+    <>
+      {/* Overlay */}
+      <div onClick={onClose} style={{
+        position:'fixed',inset:0,zIndex:200,
+        background:'rgba(0,0,0,0.6)',
+        opacity: open ? 1 : 0,
+        pointerEvents: open ? 'all' : 'none',
+        transition:'opacity 0.3s',
+        backdropFilter:'blur(4px)',
+      }}/>
+      {/* Drawer */}
+      <div style={{
+        position:'fixed',right:0,top:0,bottom:0,zIndex:201,
+        width:420,
+        background:'var(--black)',
+        borderLeft:'1px solid rgba(240,234,216,0.08)',
+        transform: open ? 'translateX(0)' : 'translateX(100%)',
+        transition:'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
+        display:'flex',flexDirection:'column',
+      }}>
+        {/* Header */}
+        <div style={{padding:'24px 32px',borderBottom:'1px solid rgba(240,234,216,0.08)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <h2 style={{fontFamily:'var(--font-display)',fontSize:28,color:'var(--cream)',letterSpacing:0}}>YOUR CART</h2>
+            <div style={{fontFamily:'var(--font-arabic)',fontSize:14,color:'var(--grey)'}}>سلة التسوق</div>
+          </div>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'var(--grey)',cursor:'pointer',fontSize:24,lineHeight:1}}>×</button>
+        </div>
+
+        {/* Items */}
+        <div style={{flex:1,overflowY:'auto',padding:'16px 0'}}>
+          {cart.length === 0 ? (
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',gap:16}}>
+              <div style={{fontFamily:'var(--font-arabic)',fontSize:72,color:'rgba(200,68,26,0.15)'}}>خير</div>
+              <p style={{color:'var(--grey)',fontSize:14}}>Your cart is empty</p>
+            </div>
+          ) : (
+            cart.map((item, i) => (
+              <div key={i} style={{
+                display:'grid',gridTemplateColumns:'80px 1fr auto',gap:16,
+                padding:'16px 32px',
+                borderBottom:'1px solid rgba(240,234,216,0.06)',
+              }}>
+                <div style={{
+                  background:item.product.bg,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  padding:8,
+                }}>
+                  <ShirtSVG product={item.product} size={64}/>
+                </div>
+                <div>
+                  <div style={{fontFamily:'var(--font-display)',fontSize:18,color:'var(--cream)'}}>{item.product.name}</div>
+                  <div style={{fontFamily:'var(--font-arabic)',fontSize:12,color:'var(--grey)',marginBottom:8}}>{item.product.arabic}</div>
+                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                    <button onClick={() => updateQty(i, item.qty - 1)} style={{background:'none',border:'1px solid rgba(240,234,216,0.15)',color:'var(--cream)',width:24,height:24,cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
+                    <span style={{color:'var(--cream)',fontSize:13,minWidth:20,textAlign:'center'}}>{item.qty}</span>
+                    <button onClick={() => updateQty(i, item.qty + 1)} style={{background:'none',border:'1px solid rgba(240,234,216,0.15)',color:'var(--cream)',width:24,height:24,cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+                  </div>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',justifyContent:'space-between',alignItems:'flex-end'}}>
+                  <span style={{fontFamily:'var(--font-display)',fontSize:20,color:'var(--cream)'}}>£{item.product.price * item.qty}</span>
+                  <button onClick={() => removeFromCart(i)} style={{background:'none',border:'none',color:'var(--grey)',cursor:'pointer',fontSize:11,letterSpacing:'0.05em',fontFamily:'var(--font-body)'}}>REMOVE</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        {cart.length > 0 && (
+          <div style={{padding:'24px 32px',borderTop:'1px solid rgba(240,234,216,0.08)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+              <span style={{color:'var(--grey)',fontSize:13}}>Subtotal</span>
+              <span style={{fontFamily:'var(--font-display)',fontSize:24,color:'var(--cream)'}}>£{total}</span>
+            </div>
+            {total >= 150 && <p style={{color:'#2d7a4f',fontSize:12,marginBottom:16}}>✓ You qualify for free UK shipping</p>}
+            {total < 150 && <p style={{color:'var(--grey)',fontSize:12,marginBottom:16}}>Add £{150 - total} more for free UK shipping</p>}
+            <button style={{
+              width:'100%',background:'var(--orange)',border:'none',color:'var(--cream)',
+              fontFamily:'var(--font-display)',fontSize:16,letterSpacing:'0.12em',
+              padding:'18px',cursor:'pointer',marginBottom:8,
+              transition:'opacity 0.2s',
+            }}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+            >CHECKOUT — £{total}</button>
+            <button onClick={onClose} style={{
+              width:'100%',background:'none',border:'1px solid rgba(240,234,216,0.1)',color:'var(--grey)',
+              fontFamily:'var(--font-body)',fontSize:12,letterSpacing:'0.05em',
+              padding:'12px',cursor:'pointer',
+            }}>CONTINUE SHOPPING</button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ─── TWEAKS ──────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#C8441A",
+  "darkMode": true,
+  "fontDisplay": "Bebas Neue"
+}/*EDITMODE-END*/;
+
+function TweaksPanel({ visible, tweaks, setTweaks }) {
+  if (!visible) return null;
+  return (
+    <div style={{
+      position:'fixed',bottom:24,right:24,zIndex:300,
+      background:'#1a1814',border:'1px solid rgba(240,234,216,0.12)',
+      width:260,padding:24,
+      boxShadow:'0 24px 48px rgba(0,0,0,0.5)',
+    }}>
+      <div style={{fontFamily:'var(--font-display)',fontSize:14,color:'var(--cream)',letterSpacing:'0.1em',marginBottom:20}}>TWEAKS</div>
+      <div style={{display:'flex',flexDirection:'column',gap:20}}>
+        <div>
+          <label style={{color:'var(--grey)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',display:'block',marginBottom:8}}>Accent Color</label>
+          <div style={{display:'flex',gap:8}}>
+            {['#C8441A','#1a6bc8','#2d7a4f','#8B4AAF'].map(c => (
+              <button key={c} onClick={() => {
+                setTweaks({...tweaks, accentColor: c});
+                document.documentElement.style.setProperty('--orange', c);
+                window.parent.postMessage({type:'__edit_mode_set_keys', edits:{accentColor:c}},'*');
+              }} style={{
+                width:32,height:32,background:c,border:`2px solid ${tweaks.accentColor===c?'var(--cream)':'transparent'}`,cursor:'pointer',
+              }}/>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label style={{color:'var(--grey)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',display:'block',marginBottom:8}}>Display Font</label>
+          {['Bebas Neue','Impact','Georgia'].map(f => (
+            <button key={f} onClick={() => {
+              setTweaks({...tweaks, fontDisplay: f});
+              document.documentElement.style.setProperty('--font-display', `'${f}', sans-serif`);
+              window.parent.postMessage({type:'__edit_mode_set_keys', edits:{fontDisplay:f}},'*');
+            }} style={{
+              display:'block',width:'100%',marginBottom:4,
+              background: tweaks.fontDisplay===f ? 'rgba(240,234,216,0.08)' : 'none',
+              border:'1px solid',borderColor: tweaks.fontDisplay===f ? 'rgba(240,234,216,0.2)' : 'transparent',
+              color: tweaks.fontDisplay===f ? 'var(--cream)' : 'var(--grey)',
+              fontFamily:`'${f}',sans-serif`,fontSize:14,padding:'6px 12px',
+              cursor:'pointer',textAlign:'left',transition:'all 0.2s',
+            }}>{f}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────
+function App() {
+  const [page, setPage] = useState('home');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [tweaksVisible, setTweaksVisible] = useState(false);
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+
+  // Tweaks setup
+  useEffect(() => {
+    document.documentElement.style.setProperty('--orange', tweaks.accentColor);
+    document.documentElement.style.setProperty('--font-display', `'${tweaks.fontDisplay}', sans-serif`);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === '__activate_edit_mode') setTweaksVisible(true);
+      if (e.data?.type === '__deactivate_edit_mode') setTweaksVisible(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({type:'__edit_mode_available'},'*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const addToCart = (product, qty = 1) => {
+    setCart(prev => {
+      const idx = prev.findIndex(i => i.product.id === product.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
+        return next;
+      }
+      return [...prev, { product, qty }];
+    });
+  };
+
+  const removeFromCart = (idx) => setCart(prev => prev.filter((_,i) => i !== idx));
+  const updateQty = (idx, qty) => {
+    if (qty <= 0) { removeFromCart(idx); return; }
+    setCart(prev => prev.map((item, i) => i === idx ? { ...item, qty } : item));
+  };
+
+  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  return (
+    <div>
+      <Nav page={page} setPage={setPage} cartCount={cartCount} setCartOpen={setCartOpen}/>
+
+      {page === 'home' && <HomePage setPage={setPage} setSelectedProduct={setSelectedProduct} addToCart={addToCart}/>}
+      {page === 'shop' && <ShopPage setPage={setPage} setSelectedProduct={setSelectedProduct} addToCart={addToCart}/>}
+      {page === 'product' && <ProductPage product={selectedProduct || PRODUCTS[0]} setPage={setPage} addToCart={addToCart}/>}
+      {page === 'about' && <AboutPage setPage={setPage}/>}
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} removeFromCart={removeFromCart} updateQty={updateQty}/>
+      <TweaksPanel visible={tweaksVisible} tweaks={tweaks} setTweaks={setTweaks}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
